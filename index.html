@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>초등어휘 단어 게임</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #FFFAF0;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #FF69B4;
+        }
+        .hidden {
+            display: none;
+        }
+        .section {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #FFF0F5;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .button {
+            background-color: #FF69B4;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 15px 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #FF1493;
+        }
+        .quiz-option {
+            display: block;
+            text-align: left;
+            margin: 10px 0;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        #score {
+            font-size: 24px;
+            color: #32CD32;
+        }
+        #review {
+            text-align: left;
+            margin-top: 20px;
+        }
+        #review h3 {
+            color: #FF69B4;
+        }
+        #review p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<h1>✨ 초등어휘 단어 게임 ✨</h1>
+
+<div id="studySection" class="section">
+    <div id="studyContent">
+        <!-- Study content will be injected here -->
+    </div>
+    <button class="button" id="nextStudyBtn">다음</button>
+</div>
+
+<div id="quizSection" class="section hidden">
+    <h2>단어 퀴즈</h2>
+    <div id="quizContent">
+        <!-- Quiz content will be injected here -->
+    </div>
+    <button class="button" id="nextQuizBtn">다음</button>
+    <button class="button hidden" id="submitQuizBtn">제출</button>
+</div>
+
+<div id="scoreSection" class="section hidden">
+    <h2>🎉 점수 🎉</h2>
+    <p id="score">0 / 10</p>
+    <div id="review">
+        <!-- Review of incorrect answers will be shown here -->
+    </div>
+    <button class="button" onclick="location.reload()">다시 하기</button>
+</div>
+
+<script>
+// 데이터 정의
+const words = [
+    { word: "간단히", definition: "복잡하지 않고 쉽게." },
+    { word: "간식", definition: "식사 사이에 먹는 가벼운 음식." },
+    { word: "간장", definition: "음식의 간을 맞추는 데 사용하는 짠 액체 조미료." },
+    { word: "갈다", definition: "문지르거나 깎아서 매끄럽게 하다." },
+    { word: "갈다(교체하다)", definition: "바꾸다, 교체하다." },
+    { word: "갈비탕", definition: "소 갈비로 만든 국물 요리." },
+    { word: "갈색", definition: "붉은빛이 도는 어두운 색." },
+    { word: "갈아입다", definition: "옷을 다른 것으로 바꿔 입다." },
+    { word: "갈아타다", definition: "타고 가던 교통수단에서 내려 다른 것으로 바꿔 타다." },
+    { word: "감", definition: "가을에 익는 달콤한 과일." }
+];
+
+const sentences = {
+    "간단히": [
+        "이 문제는 간단히 해결할 수 있어요.",
+        "간단히 설명해 주세요.",
+        "간단히 식사를 마쳤다."
+    ],
+    "간식": [
+        "오후에 간식을 먹었다.",
+        "엄마가 맛있는 간식을 준비하셨다.",
+        "학교에서 간식을 나눠 주었다."
+    ],
+    "간장": [
+        "간장으로 맛을 냈다.",
+        "계란프라이에 간장을 뿌려 먹었다.",
+        "간장을 너무 많이 넣지 마세요."
+    ],
+    "갈다": [
+        "칼을 갈아서 날카롭게 만들었다.",
+        "숯을 갈아 가루로 만들었다.",
+        "돌을 갈아 표면을 매끄럽게 했다."
+    ],
+    "갈다(교체하다)": [
+        "오래된 칫솔을 새 것으로 갈았다.",
+        "타이어를 갈아야 할 때가 되었다.",
+        "전구를 갈았다."
+    ],
+    "갈비탕": [
+        "저녁으로 갈비탕을 먹었다.",
+        "갈비탕은 영양가가 높다.",
+        "따뜻한 갈비탕이 몸을 데워준다."
+    ],
+    "갈색": [
+        "그녀의 눈은 갈색이다.",
+        "나뭇잎이 갈색으로 변했다.",
+        "갈색 신발을 샀다."
+    ],
+    "갈아입다": [
+        "집에 와서 편한 옷으로 갈아입었다.",
+        "옷이 젖어서 갈아입어야 한다.",
+        "운동 후에 깨끗한 옷으로 갈아입었다."
+    ],
+    "갈아타다": [
+        "지하철을 갈아타고 학교에 갔다.",
+        "버스에서 내려 기차로 갈아탔다.",
+        "여기서 2호선으로 갈아타세요."
+    ],
+    "감": [
+        "가을에는 감이 맛있다.",
+        "나무에 감이 주렁주렁 열렸다.",
+        "달콤한 감을 먹었다."
+    ]
+};
+
+const quizQuestions = [
+    {
+        question: "1. 이 문제는 ____ 해결할 수 있어요.",
+        options: ["간단히", "갈비탕"],
+        correctAnswer: "간단히"
+    },
+    {
+        question: "2. 오후에 ____을 먹었다.",
+        options: ["간장", "간식"],
+        correctAnswer: "간식"
+    },
+    {
+        question: "3. 칼을 ____ 날카롭게 만들었다.",
+        options: ["갈아", "갈아타"],
+        correctAnswer: "갈아"
+    },
+    {
+        question: "4. 집에 와서 편한 옷으로 ____.",
+        options: ["갈아입었다", "갈아탔다"],
+        correctAnswer: "갈아입었다"
+    },
+    {
+        question: "5. 지하철을 ____ 학교에 갔다.",
+        options: ["갈아입고", "갈아타고"],
+        correctAnswer: "갈아타고"
+    },
+    {
+        question: "6. 저녁으로 ____을 먹었다.",
+        options: ["갈비탕", "갈색"],
+        correctAnswer: "갈비탕"
+    },
+    {
+        question: "7. 나뭇잎이 ____으로 변했다.",
+        options: ["갈비탕", "갈색"],
+        correctAnswer: "갈색"
+    },
+    {
+        question: "8. 가을에는 ____이 맛있다.",
+        options: ["감", "간식"],
+        correctAnswer: "감"
+    },
+    {
+        question: "9. 오래된 칫솔을 새 것으로 ____.",
+        options: ["갈았다", "갈비탕"],
+        correctAnswer: "갈았다"
+    },
+    {
+        question: "10. 계란프라이에 ____을 뿌려 먹었다.",
+        options: ["간장", "간식"],
+        correctAnswer: "간장"
+    }
+];
+
+// 상태 변수
+let currentWordIndex = 0;
+let currentQuizIndex = 0;
+let score = 0;
+let incorrectAnswers = [];
+
+// 초기화 함수
+function showDefinition() {
+    if (currentWordIndex < words.length) {
+        const word = words[currentWordIndex];
+        document.getElementById('studyContent').innerHTML = `
+            <h2>단어 뜻 배우기</h2>
+            <h3>${word.word}</h3>
+            <p>${word.definition}</p>
+        `;
+    } else {
+        // 모든 단어 학습이 끝나면 퀴즈 시작
+        document.getElementById('studySection').classList.add('hidden');
+        initQuiz();
+        document.getElementById('quizSection').classList.remove('hidden');
+    }
+}
+
+function showSentences() {
+    const word = words[currentWordIndex];
+    const sentenceList = sentences[word.word];
+    let sentencesHTML = `<h2>예문 배우기</h2><h3>${word.word}</h3>`;
+    sentenceList.forEach(sentence => {
+        sentencesHTML += `<p>• ${sentence}</p>`;
+    });
+    document.getElementById('studyContent').innerHTML = sentencesHTML;
+}
+
+// 버튼 이벤트 리스너
+document.getElementById('nextStudyBtn').addEventListener('click', () => {
+    if (document.getElementById('studyContent').innerHTML.includes('단어 뜻 배우기')) {
+        showSentences();
+    } else {
+        currentWordIndex++;
+        showDefinition();
+    }
+});
+
+// 퀴즈 함수
+function initQuiz() {
+    if (currentQuizIndex < quizQuestions.length) {
+        const q = quizQuestions[currentQuizIndex];
+        document.getElementById('quizContent').innerHTML = `
+            <p>${q.question}</p>
+            ${q.options.map((option, index) => `
+                <label class="quiz-option">
+                    <input type="radio" name="quiz${currentQuizIndex}" value="${option}">
+                    ${option}
+                </label>
+            `).join('')}
+        `;
+        // Toggle buttons
+        if (currentQuizIndex === quizQuestions.length - 1) {
+            document.getElementById('nextQuizBtn').classList.add('hidden');
+            document.getElementById('submitQuizBtn').classList.remove('hidden');
+        } else {
+            document.getElementById('nextQuizBtn').classList.remove('hidden');
+        }
+    }
+}
+
+document.getElementById('nextQuizBtn').addEventListener('click', () => {
+    const q = quizQuestions[currentQuizIndex];
+    const selected = document.querySelector(`input[name="quiz${currentQuizIndex}"]:checked`);
+    if (selected) {
+        if (selected.value === q.correctAnswer) {
+            score++;
+        } else {
+            incorrectAnswers.push({
+                question: q.question,
+                yourAnswer: selected.value,
+                correctAnswer: q.correctAnswer
+            });
+        }
+        currentQuizIndex++;
+        initQuiz();
+    } else {
+        alert("답을 선택해주세요!");
+    }
+});
+
+document.getElementById('submitQuizBtn').addEventListener('click', () => {
+    const q = quizQuestions[currentQuizIndex];
+    const selected = document.querySelector(`input[name="quiz${currentQuizIndex}"]:checked`);
+    if (selected) {
+        if (selected.value === q.correctAnswer) {
+            score++;
+        } else {
+            incorrectAnswers.push({
+                question: q.question,
+                yourAnswer: selected.value,
+                correctAnswer: q.correctAnswer
+            });
+        }
+        currentQuizIndex++;
+        showScore();
+    } else {
+        alert("답을 선택해주세요!");
+    }
+});
+
+function showScore() {
+    document.getElementById('quizSection').classList.add('hidden');
+    document.getElementById('score').innerText = `${score} / ${quizQuestions.length}`;
+    if (incorrectAnswers.length > 0) {
+        let reviewHTML = `<h3>틀린 문제 복습</h3>`;
+        incorrectAnswers.forEach((item, index) => {
+            reviewHTML += `
+                <p><strong>문제 ${index + 1}:</strong> ${item.question}</p>
+                <p>당신의 답: ${item.yourAnswer}</p>
+                <p>정답: ${item.correctAnswer}</p>
+                <hr>
+            `;
+        });
+        document.getElementById('review').innerHTML = reviewHTML;
+    } else {
+        document.getElementById('review').innerHTML = "<p>모든 문제를 맞추셨습니다! 잘하셨어요!</p>";
+    }
+    document.getElementById('scoreSection').classList.remove('hidden');
+}
+
+// 초기화 시작
+showDefinition();
+</script>
+
+</body>
+</html>
